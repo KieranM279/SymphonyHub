@@ -183,3 +183,109 @@ def reorgData(df):
     return(symptoms_dict)
 ```
 ###### Step 4 -
+
+
+## Temperature import script
+
+#### Pre-requisite filenames
+* **day_names.txt** - A text file containing a list of all the day names that the participant may have recorded their temperature (Day 0 - 27).
+
+#### Usage
+```python
+# Import the list of participants from Symphony
+symphony_ids = getSymphony()
+# Import the list of Days from a text file
+days = getDays(days_filename)
+# Create a dictionary of partipants and the filenames of their Symptom Diary
+diary_dict = DiaryDictmaker()
+# Create a dictionary of the Temperature data from the Symptom Diaries
+temperature_data = collateData()
+```
+#### Method
+
+###### Step 1 - Import a list of the participant IDs
+First step is to import the list of IDs from Symphony and save them as a list. This makes sure I output the final dataset in the right format.
+```python
+def getSymphony():
+
+    path = str(symphony_path + symphony_filename)
+
+    # Import list of IDs from the Symphony MRS
+    fields = ['id_sub']
+    participants = pd.read_excel(path,
+                                 sheet_name='Raw Temperatures',
+                                 usecols=(fields))
+    participants = participants.dropna()
+    part_list = list()
+
+    # Create a list of the IDs
+    for p in participants['id_sub']:
+
+        part_list.append(p)
+
+    return(part_list)
+```
+
+###### Step 2 - Create a list of Study days for the columns
+```python
+def getDays(filename):
+
+    # Open the file with the name conversions
+    names = open(filename)
+    day_list = list()
+
+    # Loop through the line of the symptom names file
+    for ln in names.readlines():
+
+        ln = ln.strip()
+
+        # Create a list of the days
+        day_list.append(ln)
+
+    return(day_list)
+```
+
+###### Step 3 - Get a dictionary of all the Symptom Diary Filenames
+This step is used to create a dictionary of all the filenames in the ATACCC and INSTINCT cohort. The participant IDs are used as the keys for the dictionary.
+
+NOTE: Currently has no way to deal with the ATACCC 'b' participants.
+```python
+def DiaryDictmaker():
+    dictionary = {}
+
+    # Get a list of filenames from the TRACKER DATABASE
+    ataccc_diary_list = os.listdir(ataccc_symptom_diaries)
+    instinct_diary_list = os.listdir(instinct_symptom_diaries)
+
+    ####    INSTINCT Diary Filenames    ####
+
+    # Loop throught the list of filenames
+    for filenameINS in instinct_diary_list:
+
+        # Skip if it is not a Symptom Diary
+        if filenameINS[0:3] != 'INS':
+            continue
+
+        # Create a dictionary of the participants and their diary filename
+        dictionary[str(filenameINS[0:7])] = filenameINS
+
+        if str(filenameINS[7]) == 'i':
+            dictionary[str(filenameINS[0:8])] = filenameINS
+
+    ####    ATACCC Diary Filenames    ####
+
+    # Loop through the list of filenames
+    for filenameATA in ataccc_diary_list:
+
+        # Skip if it is not a Symptom Diary
+        if filenameATA[0:3] != 'ATA':
+            continue
+
+        # Create a dictionary of the participants and their diary filename
+        dictionary[str(filenameATA[0:7])] = filenameATA
+
+        if str(filenameATA[7]) == 'i':
+            dictionary[str(filenameATA[0:8])] = filenameATA
+
+    return(dictionary)
+```

@@ -55,16 +55,13 @@ This reads the Input filename and then decides the directory to use based on the
 ```python
 def getData(filename):
 
-    if filename[0:3] == 'INS':
-        ###   INSTINCT   ###
+  if filename[0:3] == 'INS':
+      ###   INSTINCT   ###
+      path = str(dir_dict['instinct_symptom_diaries'] + str(filename))
 
-        # Use the Symptom diaries from the TRACKER DATABASE
-        path = 'Y:/HPRU in respiratory infections 2 (2020-2025)/INSTINCT/TRACKER DATABASE/Symptom diary data/INSTINCT Symptom Diaries/' + str(filename)
-    elif filename[0:3] == 'ATA':
-        ###   ATACCC   ###
-
-        # Use the Symptom diaries from the TRACKER DATABASE
-        path = 'Y:/HPRU in respiratory infections 2 (2020-2025)/INSTINCT/TRACKER DATABASE/Symptom diary data/ATACCC Symptom Diaries/' + str(filename)
+  elif filename[0:3] == 'ATA':
+      ###   ATACCC   ###
+      path = str(dir_dict['ataccc_symptom_diaries'] + str(filename))
 
     # Read the '.xlsx' file into python
     data = pd.read_excel(path,

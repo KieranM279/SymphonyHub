@@ -377,7 +377,7 @@ def getArray(dictionary):
     
     return(an_array)
 
-savetxt('/Outputs/raw_scores_output.csv', getArray(final_dict), delimiter=',',fmt='%s')
+savetxt(dir_dict['output_dir'] + 'raw_scores_output.csv', getArray(final_dict), delimiter=',',fmt='%s')
 end = time.time()
 
 print('Time ellapsed: ' + str((end-start)))

@@ -12,8 +12,6 @@
 ```python
 import os
 import pandas as pd
-import numpy as np
-from numpy import savetxt
 import time
 ```
 
@@ -25,6 +23,8 @@ symptoms = list(getNames('symptom_names.txt').values())
 diary_dataframe = getData('filename.xlsx')
 # Reorganise dataframe into a dictionary
 symptom_dict = reorgData(diary_dataframe)
+# Generates final dataset and highlights participant symptom diaries that have not been entered
+final_dict, chase_up = collateData()
 ```
 #### Methods
 ###### Step 1 - Import the list of Symptom names
@@ -51,7 +51,7 @@ def getNames(filename):
 symptoms = list(getNames('symptom_names.txt').values())
 ```
 ###### Step 2 - Function to import a single Symptom Diary
-This reads the Input filename and then decides the directory to use based on the first three letter. It can then import the data as a dataframe, selecting the first 31 rows (minus the ID and dates row). The text data is then replaced with their numerical equivalents, and NA values are removed. The last section is there to remove zeroes from the scores section when there are not any symptoms entered. Its not the cleanest but it works.
+This reads the participant symptom diary filename and then decides the directory to use based on the first three letters. It can then import the data as a dataframe, selecting the first 31 rows (minus the ID and dates row). The text data is then replaced with their numerical equivalents, and NA values are removed. The last section is there to remove zeroes from the scores section when there are not any symptoms entered. Its not the cleanest but it works.
 ```python
 def getData(filename):
 
@@ -120,7 +120,7 @@ def getData(filename):
     return(data2)
 ```
 ###### Step 3 - Reorganise the dataframe data into a usable dictionary format
-This function takes in a dataframe containing a single symptom diary of data and outputs a dictionary of lists where the keys are the individual symptoms of the participant. Each list is ordered by day and missing days are imputed as blanks to match full length of the study window (Days -10 to 27).
+This function takes in a dataframe containing a single symptom diary and outputs a dictionary of lists where the keys are the individual symptoms of the participant. Each list is ordered by day and missing days are imputed as blanks to match full length of the study window (DU, Days -10 to 27).
 ```python
 def reorgData(df):
 
@@ -182,8 +182,154 @@ def reorgData(df):
 
     return(symptoms_dict)
 ```
-###### Step 4 -
+###### Step 5 - Create a dictionary of all the symptom diary filenames
+Skipping straight onto step 5, as step 4 is now redundant, I create a dictionary of all the participant symptom diary filenames. The Participant IDs form the keys of the dictionary. This is used to download each symptom diary individually whilst having them linked to the respective participant. This will need to be modified with the addition of the new cohorts.
 
+```python
+def DiaryDictmaker():
+    dictionary = {}
+
+   # Get a list of filenames from the TRACKER DATABASE
+    ataccc_diary_list = os.listdir(dir_dict['ataccc_symptom_diaries'])
+    instinct_diary_list = os.listdir(dir_dict['instinct_symptom_diaries'])
+
+    ####    INSTINCT Diary Filenames    ####
+
+    # Loop throught the list of filenames
+    for filenameINS in instinct_diary_list:
+
+        # Skip if it is not a Symptom Diary
+        if filenameINS[0:3] != 'INS':
+            continue
+
+        # Create a dictionary of the participants and their diary filename
+        dictionary[str(filenameINS[0:7])] = filenameINS
+
+        if str(filenameINS[7]) == 'i':
+            dictionary[str(filenameINS[0:8])] = filenameINS
+
+    ####    ATACCC Diary Filenames    ####
+
+    # Loop throught the list of filenames
+    for filenameATA in ataccc_diary_list:
+
+        # Skip if it is not a Symptom Diary
+        if filenameATA[0:3] != 'ATA':
+            continue
+
+        # Create a dictionary of the participants and their diary filename
+        dictionary[str(filenameATA[0:7])] = filenameATA
+
+        if str(filenameATA[7]) == 'i':
+            dictionary[str(filenameATA[0:8])] = filenameATA
+
+    return(dictionary)
+
+diary_dict = DiaryDictmaker()
+```
+###### Step 6 - Get a list of all Symphony participants
+Simple function to get a list of all the participants within Symphony. This is to ensure that we have all the data necessary and nothing more.
+```python
+def getSymphony():
+
+    # Establish the path of the Symphony MRS
+    filename = '2021_10_25 SYMPHONY Master Results Spreadsheet.xlsx'
+    path = str(dir_dict['MRS_path']) + str(filename)
+
+    # Import list of IDs from the Symphony MRS
+    fields = ['id_sub']
+    participants = pd.read_excel(path,
+                                 sheet_name='Raw Symptom Scores',
+                                 usecols=(fields))
+
+    # Remove NAs and export as list
+    participants = participants.dropna()
+    part_list = participants['id_sub'].tolist()
+
+    return(part_list)
+```
+
+###### Step 7 - Collate all the data into one dictionary
+This essentially forms the main purpose of the script. This function loops through the participants within the Symphony dataset and imports and transforms the participant symptom diary data (using getData() and reorgData() respectively). The transformed data is then added to the final dictionary. If a participant symptom diary cannot be found, an empty entry is generated and the ID is added to a dictionary of IDs that need to be chased up.
+```python
+def collateData():
+
+    final_dict = {}
+
+    # Ordered list of columns to utilise the symptom dictionary
+    column_list = ['symp','cffd2gi','lower','upper','gi','system','sburden',
+                   'normal','fever','cough_persistent','cough_productive',
+                   'cough_blood','breathless','muscle_aches','nausea','fatigue','confusion',
+                   'diarrhoea','chest_pain','headache','sore_throat','rhinitis',
+                   'rash','conjunctivitis','anosmia','hoarse_voice','appetite_loss',
+                   'abdominal_pain','wheeze']
+
+    # Initialise a dictionary of Symptom Diaries to chase up
+    chase_up = {'ATACCC':list(),
+                'INSTINCT':list()}
+
+    # Create a list of participants with entered diaries
+    entered_diaries = list(diary_dict.keys())
+
+    # Loop though IDs from Symphony
+    for i in symphony_ids:
+        print(i)
+        # If their diary is not present in the TRACKER DATABASE
+        if i not in entered_diaries:
+
+            # Add it to either ATACCC or INSTINCT chase_up list
+            if i[0:3] == 'ATA':
+                chase_up['ATACCC'].append(i)
+            elif i[0:3] == 'INS':
+                chase_up['INSTINCT'].append(i)
+            else:
+                print('help')
+
+            # Create an empty list for them
+            empty = list()
+            for n in range(1131):
+                empty.append('')
+
+            # Add them, alogn with their empty list, to the final dictionary
+            final_dict[i] = empty
+
+        # if their Symptom Diary is present
+        else:
+
+            # Import the data from the Symptom Diary
+            filename = diary_dict[i]
+            diary_dataframe = getData(filename)
+
+            # Organise into a useful dictionary format
+            symptom_dict = reorgData(diary_dataframe)
+
+            # Loop though ORDERED column list
+            participant_data = list()
+            for col in column_list:
+
+                # Loop through each score of the symptoms
+                for s in symptom_dict[col]:
+
+                    # Add it to a continous list
+                    participant_data.append(s)
+
+            # Add it to the final dictionary
+            final_dict[i] = participant_data
+
+    return(final_dict, chase_up)
+
+final_dict, chase_up = collateData()
+```
+###### Step 8 - Export the final dictionary to a '.csv'
+```python
+def getArray(dictionary):
+
+    data = pd.DataFrame.from_dict(dictionary)
+
+    return(data.transpose())
+
+getArray(final_dict).to_csv(dir_dict['output_dir'] + 'raw_scores_output.csv')
+```
 
 ## Temperature import script
 

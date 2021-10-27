@@ -9,8 +9,6 @@ import os
 #os.chdir('C:/Users/kiera/Desktop/Symphony/Symptom Diary Import')
 os.chdir('/Volumes/kmadon/Documents/InProgress/SymphonyHub/')
 import pandas as pd
-import numpy as np
-from numpy import savetxt
 import time
 start = time.time()
 
@@ -128,7 +126,6 @@ def getData(filename):
     
     return(data2)
 
-#data = getData('INS0047.xlsx')
 
 ####    Step 3    #### Re-organises dataframe into a dictionary format ####
 
@@ -193,45 +190,6 @@ def reorgData(df):
     return(symptoms_dict)
 
 
-####    Step 4    ####    Create a list of all the columns to be made    ####
-
-def colMaker(df):
-    
-    # Define the three sets of columns I want to create
-    column_dict = {'colset1' : ['symp'],
-                   'colset2' : ['cffd2gi','lower','upper','gi','system',
-                                'sburden'],
-                   'colset3' : ['normal','fever','cough_persistent',
-                                'cough_productive','cough_blood','breathless','muscle_aches',
-                                'nausea','fatigue','confusion','diarrhoea',
-                                'chest_pain','headache','sore_throat',
-                                'rhinitis','rash','conjunctivitis','anosmia',
-                                'hoarse_voice','appetite_loss','abdominal_pain',
-                                'wheeze']}
-    
-    col_list = list()
-    
-    # Loop though each of the three column sets
-    for col_set in column_dict:
-        # Loop though each column within each set
-        for c in column_dict[col_set]:
-            # Loop through the range of study days (-10 to 27)
-            for i in range(-10,28):
-                
-                # Create a list of column names for each column
-                column = str(c + '_d' + str(i))
-                col_list.append(column)
-    
-    # Transform list into an array
-    #col_array = np.array([col_list])
-    return(col_list)
-
-#columns = colMaker(data)
-
-#col_array  = np.array([columns])
-#savetxt('Columns.csv', col_array, delimiter=',',fmt='%s')
-
-
 ####    Step 5    ####    Create a diary of all the diary filenames    ####
 
 def DiaryDictmaker():
@@ -280,7 +238,8 @@ diary_dict = DiaryDictmaker()
 
 def getSymphony():
     
-    filename = '2021_10_08 SYMPHONY Master Results Spreadsheet.xlsx'
+    # Establish the path of the Symphony MRS
+    filename = '2021_10_25 SYMPHONY Master Results Spreadsheet.xlsx'
     path = str(dir_dict['MRS_path']) + str(filename)
     
     # Import list of IDs from the Symphony MRS
@@ -288,8 +247,9 @@ def getSymphony():
     participants = pd.read_excel(path,
                                  sheet_name='Raw Symptom Scores',
                                  usecols=(fields))
-    participants = participants.dropna()
     
+    # Remove NAs and export as list
+    participants = participants.dropna()
     part_list = participants['id_sub'].tolist()
     
     return(part_list)
@@ -371,18 +331,14 @@ final_dict, chase_up = collateData()
 
 def getArray(dictionary):
     
-    # Turn dictionary entries to an array
-    data = list(dictionary.values())
-    an_array = np.array(data)
+    data = pd.DataFrame.from_dict(dictionary)
     
-    return(an_array)
+    return(data.transpose())
 
-savetxt(dir_dict['output_dir'] + 'raw_scores_output.csv', getArray(final_dict), delimiter=',',fmt='%s')
+getArray(final_dict).to_csv(dir_dict['output_dir'] + 'raw_scores_output.csv')
 end = time.time()
 
 print('Time ellapsed: ' + str((end-start)))
 
 del start
 del end
-#del col_array
-#del data

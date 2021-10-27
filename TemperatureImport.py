@@ -11,8 +11,6 @@ import time
 
 start = time.time()
 
-#######      Path Variables required      #######
-
 def getDir():
     
     file = open('mac_dir.txt')
@@ -30,14 +28,6 @@ def getDir():
 
 dir_dict = getDir()
 
-
-#######      Path Variables required      #######
-
-ataccc_symptom_diaries = dir_dict['ataccc_symptom_diaries']
-instinct_symptom_diaries = dir_dict['instinct_symptom_diaries']
-symphony_path = dir_dict['MRS_path']
-
-#######      Path Variables required      #######
 
 #######      Filenames required      #######
 
@@ -60,7 +50,7 @@ def FtoC(f):
 
 def getSymphony():
     
-    path = str(symphony_path + symphony_filename)  
+    path = str(dir_dict['MRS_path'] + symphony_filename)  
     
     # Import list of IDs from the Symphony MRS
     fields = ['id_sub']
@@ -108,8 +98,8 @@ def DiaryDictmaker():
     dictionary = {}
     
     # Get a list of filenames from the TRACKER DATABASE
-    ataccc_diary_list = os.listdir(ataccc_symptom_diaries)
-    instinct_diary_list = os.listdir(instinct_symptom_diaries)
+    ataccc_diary_list = os.listdir(dir_dict['ataccc_symptom_diaries'])
+    instinct_diary_list = os.listdir(dir_dict['instinct_symptom_diaries'])
     
     ####    INSTINCT Diary Filenames    ####
     
@@ -207,8 +197,6 @@ def reorgData(df):
     
     return(final_days_dict)
 
-#test = reorgData(data)
-
 
 ####    Step 6    ####    Collate data     ####
 
@@ -262,3 +250,4 @@ print('===============================================')
 
 del start
 del end
+del days_filename

@@ -335,6 +335,7 @@ getArray(final_dict).to_csv(dir_dict['output_dir'] + 'raw_scores_output.csv')
 
 #### Pre-requisite filenames
 * **day_names.txt** - A text file containing a list of all the day names that the participant may have recorded their temperature (Day 0 - 27).
+* **mac_dir.txt** - A tab-separated text file of all the directory locations required by the script. This has to be updated and changed for the needs of the user and with the addition of new cohorts.
 
 #### Usage
 ```python
@@ -434,4 +435,99 @@ def DiaryDictmaker():
             dictionary[str(filenameATA[0:8])] = filenameATA
 
     return(dictionary)
+```
+
+###### Step 4 - Import participant symptom diary_dict
+This is a simplified version of the getData() function from DiaryImport5.py. This only imports the temperatures of the participants and therefore is a little quicker.
+```python
+def getData(filename):
+
+    if filename[0:3] == 'INS':
+        ###   INSTINCT   ###
+        path = str(dir_dict['instinct_symptom_diaries'] + str(filename))
+
+    elif filename[0:3] == 'ATA':
+        ###   ATACCC   ###
+        path = str(dir_dict['ataccc_symptom_diaries'] + str(filename))
+
+    # Read the '.xlsx' file into python
+    data = pd.read_excel(path,
+                         sheet_name='SYMPTOM_DIARY',
+                         header=1,
+                         index_col=(0),
+                         skiprows=([2,4]),
+                         #skipfooter=35
+                         )
+    # Isolate the rows you want
+    data2 = data[:1]
+
+    # Clean up th data
+    data2 = data2.fillna(value = '')
+    data2 = data2.replace('.','')
+    # Get the improved row names from Step 1
+    return(data2)
+```
+
+###### Step 5 - Transform the data
+This transforms the data into the required format. It created a dictionary of a participants temperatures, using the study days as the keys. If there is no recorded temperatures then an empty string is entered, and if the temperature was recorded in Fahrenheit (e.g. >80), then it is converted to Celsius.
+```python
+def reorgData(df):
+
+    final_days_dict = {}
+
+    # Create a dictionary of each of the temperature data (by day)
+    days_dict = df.to_dict(orient='index')
+    days_dict = days_dict['TEMPERATURE']
+
+    # Loop through each day
+    for i in days:
+
+        # Add a blank if the day is not present in the Symptom Diary
+        if i not in list(days_dict.keys()):
+            final_days_dict[i] = ''
+        else:
+
+            # Isolate temperature
+            temp = days_dict[i]
+
+            # If the temp is reported in Farenheit, convert to celcius
+            if temp != '' and temp > 80:
+                temp = FtoC(temp)
+
+            final_days_dict[i] = temp
+
+    return(final_days_dict)
+```
+
+###### Step 6 - Collate the data into a dictionary of dictionaries
+Creates a final dictionary of dictionaries containing the participant IDs as keys at the first level and then the Days as keys of the second level. If there is no entry for them then the temperatures are inputted as blanks.
+```python
+def collateData():
+
+    final_dict = {}
+    entry = {}
+
+    # Loop through symphony IDs
+    for i in symphony_ids:
+
+        print(i)
+
+        # If there is no diary...
+        if i not in list(diary_dict.keys()):
+
+            # ...add a list of blanks
+            for d in days:
+
+                entry[d] = ''
+        else:
+
+            # Get the participant data
+            diary = getData(diary_dict[i])
+            # Re-organise the data into a dictionary
+            entry = reorgData(diary)
+
+        # Add the entry to the final dictionary
+        final_dict[i] = entry
+
+    return(final_dict)
 ```

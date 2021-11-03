@@ -379,11 +379,11 @@ def DiaryDictmaker():
         
         # Account for Non-recruited indexes
         elif (str(filenameBUZ[7]) == 'A' or str(filenameBUZ[7]) == 'B'):
-            dictionary[str(filenameBUZ[0:8])] = filenameBUZ
+            dictionary[idTrans(str(filenameBUZ[0:8]),3)] = filenameBUZ
             continue
             
         # Add to dictionary
-        dictionary[str(filenameBUZ[0:7])] = filenameBUZ
+        dictionary[idTrans(str(filenameBUZ[0:7]),3)] = filenameBUZ
     
     
     ####    ATACCC2 London Diary Filenames    ####
@@ -525,6 +525,15 @@ getArray(final_dict).to_csv(dir_dict['output_dir'] + 'raw_scores_output.csv')
 end = time.time()
 
 print('Time ellapsed: ' + str((end-start)))
+
+print('=========================')
+print("Diaries to Chase up:")
+def chase_up_printer():
+    
+    for i in chase_up.keys():
+        print(i + ': ' + str(len(chase_up[i])))
+
+chase_up_printer()
 
 del start
 del end

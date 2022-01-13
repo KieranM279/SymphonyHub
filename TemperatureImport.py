@@ -31,7 +31,7 @@ dir_dict = getDir()
 
 #######      Filenames required      #######
 
-symphony_filename = '2021_10_25 SYMPHONY Master Results Spreadsheet.xlsx'
+symphony_filename = '2022_01_12 SYMPHONY Master Results Spreadsheet.xlsx'
 days_filename = 'day_names.txt'
 
 #######      Filenames required      #######
@@ -45,6 +45,108 @@ def FtoC(f):
     return(c)
 
 #######     Farenheit to Celcius converter     #######
+
+###### Helper functions ######
+
+def MotifF(motif, string):
+
+    # Sets the length of the motif and string
+    motif_length = len(motif)
+    string_length = len(string)
+    
+    if motif_length > string_length:
+        Bool = False
+        return(Bool)
+
+    # Loops as a sliding window through the String
+    for i in range(string_length):
+
+        # Potential match to motif
+        P_match = string[i:i+motif_length]
+
+        # Conditional identifying the presence of the motif
+        if len(P_match) < motif_length:
+            break
+        elif motif == P_match:
+            Bool = True
+            #print(i)
+            #print(len(P_match))
+            break
+        else:
+            Bool = False
+
+    return(Bool)
+
+
+def idTrans(ids, n):
+    
+    
+    # Set to Booleans to account for retrospectively recruited indexes
+    retro_indexA = False
+    retro_indexB = False
+    
+    if ids[-1] == 'A':
+        retro_indexA = True
+        ids = ids[0:len(ids)-1]
+    
+    if ids[-1] == 'B':
+        retro_indexB = True
+        ids = ids[0:len(ids)-1]
+    
+    
+    # List the five cohorts
+    cohorts = ['ATA','INS','FUZR','FUZHH','BUZ']
+    
+    dictionary = {'cohort':'',
+                  'participant':''}
+    
+    # Loop through all the possible cohorts
+    for c in cohorts:
+        
+        # if the cohort motif is present in the ID
+        if MotifF(c,ids):
+            
+            
+            # Remove the ID and transform remainder to an integer
+            ids = ids.replace(c,'')
+            
+            # Save participant info
+            dictionary['cohort'] = c
+            dictionary['participant'] = int(ids)
+    
+    
+    
+    # Define the number of digits in the participant number
+    if (dictionary['participant'] <= 9):
+        length = 1
+    
+    elif (dictionary['participant'] >=10 and dictionary['participant'] <= 99):
+        length = 2
+    
+    elif (dictionary['participant'] >= 100 and dictionary['participant'] <= 999):
+        length = 3
+        
+    else:
+        print('help: The participant number exceeds 999')
+    
+    # Identify the nunber of zeros needed
+    zeros = n-length
+    
+    n_zero = ''
+    
+    for z in range(zeros):
+        
+        n_zero = n_zero + '0'
+    
+    
+    if retro_indexA:
+        return(dictionary['cohort'] + n_zero + str(dictionary['participant']) + 'A')
+    elif retro_indexB:
+        return(dictionary['cohort'] + n_zero + str(dictionary['participant']) + 'B')
+    else:
+        return(dictionary['cohort'] + n_zero + str(dictionary['participant']))
+
+
 
 ####    Step 1    ####    Get a list of all the Symphony IDs    ####
 
@@ -97,9 +199,12 @@ days = getDays(days_filename)
 def DiaryDictmaker():
     dictionary = {}
     
-    # Get a list of filenames from the TRACKER DATABASE
+   # Get a list of filenames from the TRACKER DATABASE
     ataccc_diary_list = os.listdir(dir_dict['ataccc_symptom_diaries'])
     instinct_diary_list = os.listdir(dir_dict['instinct_symptom_diaries'])
+    bolton_diary_list = os.listdir(dir_dict['bolton_symptom_diaries'])
+    london_diary_list = os.listdir(dir_dict['london_symptom_diaries'])
+    fusion_diary_list = os.listdir(dir_dict['fusion_symptom_diaries'])
     
     ####    INSTINCT Diary Filenames    ####
     
@@ -110,11 +215,14 @@ def DiaryDictmaker():
         if filenameINS[0:3] != 'INS':
             continue
         
+        elif str(filenameINS[7]) == 'i':
+            dictionary[str(filenameINS[0:8])] = filenameINS
+            continue
+        
+        
         # Create a dictionary of the participants and their diary filename
         dictionary[str(filenameINS[0:7])] = filenameINS
         
-        if str(filenameINS[7]) == 'i':
-            dictionary[str(filenameINS[0:8])] = filenameINS
     
     ####    ATACCC Diary Filenames    ####
     
@@ -125,11 +233,62 @@ def DiaryDictmaker():
         if filenameATA[0:3] != 'ATA':
             continue
         
+        elif str(filenameATA[7]) == 'i':
+            dictionary[str(filenameATA[0:8])] = filenameATA
+            continue
+        
         # Create a dictionary of the participants and their diary filename
         dictionary[str(filenameATA[0:7])] = filenameATA
+      
+    
+    ####    FUSION Diary Filenames    ####
+    
+    # Loop through list of filenames
+    for filenameFUSHH in fusion_diary_list:
         
-        if str(filenameATA[7]) == 'i':
-            dictionary[str(filenameATA[0:8])] = filenameATA
+        # Skip of not a Symptom Diary
+        if filenameFUSHH[0:4] != 'FUZH':
+            continue
+        
+        # Add to dictionary
+        dictionary[idTrans(str(filenameFUSHH[0:9]),3)] = filenameFUSHH
+    
+    
+    ####    ATACCC2 Bolton Diary Filenames    ####
+    
+    # Loop through th list of filenames
+    for filenameBUZ in bolton_diary_list:
+        
+        # Skip if not a Symptom Diary
+        if filenameBUZ[0:3] != 'BUZ':
+            continue
+        
+        # Account for Non-recruited indexes
+        elif (str(filenameBUZ[7]) == 'A' or str(filenameBUZ[7]) == 'B'):
+            dictionary[idTrans(str(filenameBUZ[0:8]),3)] = filenameBUZ
+            continue
+            
+        # Add to dictionary
+        dictionary[idTrans(str(filenameBUZ[0:7]),3)] = filenameBUZ
+    
+    
+    ####    ATACCC2 London Diary Filenames    ####
+    
+    # Loop through list of filenames
+    for filenameFUZR in london_diary_list:
+        
+        # Skip if not a filename
+        if filenameFUZR[0:4] != 'FUZR':
+            continue
+        
+        # Account for non-recriuted indexes
+        elif (str(filenameFUZR[8]) == 'A' or str(filenameFUZR[8]) == 'B'):
+            dictionary[idTrans(str(filenameFUZR[0:9]),3)] = filenameFUZR
+            continue
+        
+        # Add to dictionary
+        dictionary[idTrans(str(filenameFUZR[0:8]),3)] = filenameFUZR
+        
     
     return(dictionary)
 
@@ -147,6 +306,18 @@ def getData(filename):
     elif filename[0:3] == 'ATA':
         ###   ATACCC   ###
         path = str(dir_dict['ataccc_symptom_diaries'] + str(filename))
+        
+    elif filename[0:3] == 'BUZ':
+        ###   ATACCC2 Bolton   ###
+        path = str(dir_dict['bolton_symptom_diaries'] + str(filename))
+        
+    elif filename[0:4] == 'FUZR':
+        ###   ATACCC2 London   ###
+        path = str(dir_dict['london_symptom_diaries'] + str(filename))
+    
+    elif filename[0:4] == 'FUZH':
+        ###   FUSION   ###
+        path = str(dir_dict['fusion_symptom_diaries'] + str(filename))
     
     # Read the '.xlsx' file into python
     data = pd.read_excel(path,

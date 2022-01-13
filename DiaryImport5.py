@@ -414,9 +414,9 @@ diary_dict = DiaryDictmaker()
 def getSymphony():
     
     # Establish the path of the Symphony MRS
-    filename = '2021_10_25 SYMPHONY Master Results Spreadsheet.xlsx'
-    #path = str(dir_dict['MRS_path']) + str(filename)
-    path = "/Volumes/kmadon/Documents/InProgress/SymphonyHub/symphony_test/test_mrs.xlsx"
+    filename = '2022_01_12 SYMPHONY Master Results Spreadsheet.xlsx'
+    path = str(dir_dict['MRS_path']) + str(filename)
+    #path = "/Volumes/kmadon/Documents/InProgress/SymphonyHub/symphony_test/test_mrs.xlsx"
     
     
     # Import list of IDs from the Symphony MRS

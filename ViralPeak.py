@@ -15,10 +15,16 @@ start = time.time()
 
 #############    Required Files    ################
 
-Symphony_filename = '2021_10_25 SYMPHONY Master Results Spreadsheet.xlsx'
-INSTINCT_MRS_filename = '2021_10_08 INSTINCT Master Results Spreadsheet.xlsx'
-ATACCC_MRS_filename = '2021_10_08 ATACCC Master Result Spreadsheet.xlsx'
+file_dict = {
 
+    'Symphony_filename' : '2022_01_12 SYMPHONY Master Results Spreadsheet.xlsx',
+    'INSTINCT_MRS_filename' : '2021_10_08 INSTINCT Master Results Spreadsheet.xlsx',
+    'ATACCC_MRS_filename' : '2021_10_08 ATACCC Master Result Spreadsheet.xlsx',
+    'FUSION_MRS_filename' : '2021_10_08 FUSION Master Result Spreadsheet.xlsx',
+    'london_MRS_filename' : '2021_10_08 ATACCC2_LONDON Master Result Spreadsheet.xlsx',
+    'bolton_MRS_filename' : '2021_10_08 ATACCC2_BOLTON Master Result Spreadsheet.xlsx'
+
+}
 
 ##########    File paths    ##########
 
@@ -45,10 +51,11 @@ dir_dict = getDir()
 def Ct_ViralLoad(x):
 
     # RNA copies per reaction
-    x = math.exp((40.702-x)/1.464)
+    x = math.exp((37.933-x)/1.418)
 
     # RNA copies per ml
-    x = x*((1000/150)*(25/5))
+    #x = x*((1000/150)*(25/5))
+    x = x * 133.3333
 
     return(x)
 
@@ -76,7 +83,7 @@ def getSymphony(filename):
 
     return(part_list)
 
-symphony_ids = getSymphony(Symphony_filename)
+symphony_ids = getSymphony(file_dict['Symphony_filename'])
 
 
 ####    Step 2    ####    Get Viral loads (ATACCC/INSTINCT)  ####
@@ -100,7 +107,7 @@ def getINSTINCT(filename):
     return(data)
 
 
-INSTINCT_vload_data = getINSTINCT(INSTINCT_MRS_filename)
+INSTINCT_vload_data = getINSTINCT(file_dict['INSTINCT_MRS_filename'])
 
 def getATACCC(filename):
 
@@ -123,7 +130,7 @@ def getATACCC(filename):
 
     return(data)
 
-ATACCC_vload_data = getATACCC(ATACCC_MRS_filename)
+ATACCC_vload_data = getATACCC(file_dict['ATACCC_MRS_filename'])
 
 
 ####    Step 3    ####    Import data to dictionary    #####

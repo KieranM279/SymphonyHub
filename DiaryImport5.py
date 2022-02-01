@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+'# -*- coding: utf-8 -*-'
 """
 Created on Wed Apr 21 11:01:31 2021
 
@@ -24,7 +24,7 @@ def getDir():
         
         # Format and add to dictionary
         ln = ln.strip('\n')
-        ln = ln.split('\t')
+        ln = ln.split('\t') 
         dictionary[ln[0]] = ln[1]
     
     return(dictionary)

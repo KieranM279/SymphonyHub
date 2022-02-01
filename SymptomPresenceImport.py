@@ -63,7 +63,7 @@ def getList():
                               sheet_name='Raw Symptom Scores',
                               usecols=(fields))
     presencelist = pd.read_excel(dir_dict['MRS_path'] +filename,
-                                 sheet_name='Symptom Presence',
+                                 sheet_name='Individual Symptoms',
                                  usecols=(fields))
     raw_score_ids = list()
     presence_list = list()
@@ -165,6 +165,8 @@ def symptomPresence():
             
             Bool = True
             scores_list = list()
+            
+            #print(symptom)
             
             # Loop through eah column of that symptom
             for col in Raw_Scores:

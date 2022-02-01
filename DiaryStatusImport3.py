@@ -595,6 +595,7 @@ def getArray():
         dictionary[i] = dictionary_entry
     
     data = pd.DataFrame(dictionary)
+    data = data.replace("U","DU")
     return(data.transpose())
 
 data = getArray()

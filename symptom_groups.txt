@@ -1,0 +1,7 @@
+lower	cough_persistent	cough_productive	cough_blood	breathless	chest_pain	wheeze
+upper	sore_throat	rhinitis	conjunctivitis	anosmia	hoarse_voice
+gi	nausea	diarrhoea	appetite_loss	abdominal_pain
+systemic	fever	muscle_aches	fatigue	confusion	headache
+cffd2g1	fever	cough_persistent	breathless	fatigue	nausea	diarrhoea	appetite_loss	abdominal_pain
+canonical	fever	cough_productive	cough_persistent	cough_blood	anosmia
+houstons_seven	fever	cough_productive	cough_persistent	cough_blood	anosmia	headache	sore_throat	muscle_aches	appetite_loss

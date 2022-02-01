@@ -1,0 +1,5 @@
+…felt feverish?,fever
+…had a persistent cough lasting for more than 4 hours?,cough_persistent
+…coughed up phlegm or mucous?,cough_productive
+…coughed blood?,cough_blood
+…had loss or change of smell or taste?,anosmia

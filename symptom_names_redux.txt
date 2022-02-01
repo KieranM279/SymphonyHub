@@ -1,0 +1,21 @@
+…felt feverish?,fever
+…had a persistent cough lasting for more than 4 hours?,cough_persistent
+…coughed up phlegm or mucous?,cough_productive
+…coughed blood?,cough_blood
+… felt unusually breathless?,breathless
+… had unusual muscle aches?,muscle_aches
+… felt sick or vomited?,nausea
+… felt tired or generally unwell?,fatigue
+… been confused?,confusion
+…had diarrhoea?,diarrhoea
+…had chest pain?,chest_pain
+…had a headache?,headache
+…had a sore throat?,sore_throat
+…had a runny or blocked nose?,rhinitis
+…had a rash?,rash
+…had red or irritated eyes?,conjunctivitis
+…had loss or change of smell or taste?,anosmia
+…had a hoarse voice?,hoarse_voice
+…had loss of appetite?,appetite_loss
+…had unusual tummy pains?,abdominal_pain
+…had a wheeze?,wheeze
